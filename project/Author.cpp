@@ -10,3 +10,7 @@ void Author::printInfo() const {
     std::cout << "Author: " << name << "\n";
     std::cout << "Biography: " << biography << "\n";
 }
+
+std::string Author::asCatalogText() const {
+    return name;
+}
