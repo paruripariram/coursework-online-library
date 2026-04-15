@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "User.h"
+
 LoanFactory::LoanFactory() {
 }
 
@@ -21,7 +23,7 @@ Loan* LoanFactory::create(Book* book,
 
     if (book->isAvailable()) {
         book->lock();
-        return new Loan(book, "pending-user", startDate, endDate);
+        return new Loan(book, user->getName(), startDate, endDate);
     }
 
     ReservationQueue* queue = nullptr;
@@ -37,7 +39,7 @@ Loan* LoanFactory::create(Book* book,
         queues.push_back(queue);
     }
 
-    queue->add(reinterpret_cast<IObserver*>(user));
+    queue->add(user);
     std::cout << "Book is busy. You are added to the queue." << "\n";
     return nullptr;
 }
