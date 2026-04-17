@@ -18,28 +18,36 @@ void User::notify(const std::string& message) {
     std::cout << "[" << name << "]: " << message << "\n";
 }
 
-void User::borrowBook(Book* book,
-                      LoanFactory& factory,
-                      const std::string& startDate,
-                      const std::string& endDate) {
+Loan* User::borrowBookAndTrack(Book* book,
+                               LoanFactory& factory,
+                               const std::string& startDate,
+                               const std::string& endDate) {
     if (book == nullptr) {
-        return;
+        return nullptr;
     }
 
     if (!subscription.isActive()) {
         std::cout << "Subscription is inactive." << "\n";
-        return;
+        return nullptr;
     }
 
     if (static_cast<int>(loans.size()) >= subscription.getLimit()) {
         std::cout << "Loan limit reached." << "\n";
-        return;
+        return nullptr;
     }
 
     Loan* newLoan = factory.create(book, this, startDate, endDate);
     if (newLoan != nullptr) {
         loans.push_back(newLoan);
     }
+    return newLoan;
+}
+
+void User::borrowBook(Book* book,
+                      LoanFactory& factory,
+                      const std::string& startDate,
+                      const std::string& endDate) {
+    borrowBookAndTrack(book, factory, startDate, endDate);
 }
 
 void User::returnLoan(Loan* loan) {
@@ -53,6 +61,17 @@ void User::returnLoan(Loan* loan) {
         if (loans[i] == loan) {
             loans.erase(loans.begin() + i);
             break;
+        }
+    }
+}
+
+void User::returnBookByTitle(const std::string& bookTitle, LoanFactory& factory) {
+    for (int i = 0; i < static_cast<int>(loans.size()); ++i) {
+        if (loans[i]->isForBook(bookTitle)) {
+            Loan* loan = loans[i];
+            returnLoan(loan);
+            factory.notifyBookReleasedByTitle(bookTitle);
+            return;
         }
     }
 }
@@ -109,4 +128,12 @@ void User::printInfo() const {
 
 std::string User::getName() const {
     return name;
+}
+
+bool User::hasEmail(const std::string& value) const {
+    return email == value;
+}
+
+int User::loanCount() const {
+    return static_cast<int>(loans.size());
 }

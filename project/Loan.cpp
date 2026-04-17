@@ -27,6 +27,13 @@ bool Loan::isOverdue(const std::string& currentDate) const {
     return currentDate > endDate;
 }
 
+bool Loan::isForBook(const std::string& bookTitle) const {
+    if (book == nullptr) {
+        return false;
+    }
+    return book->getTitle() == bookTitle;
+}
+
 void Loan::printInfo() const {
     std::cout << "Book: " << (book != nullptr ? book->getTitle() : "none") << "\n";
     std::cout << "User: " << userName << "\n";

@@ -21,6 +21,7 @@ public:
                  const std::string& startDate,
                  const std::string& endDate);
     void notifyBookReleased(Book* book);
+    void notifyBookReleasedByTitle(const std::string& bookTitle);
 };
 
 #endif

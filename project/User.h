@@ -24,11 +24,16 @@ public:
          const std::string& email,
          const Subscription& subscription);
     void notify(const std::string& message) override;
+    Loan* borrowBookAndTrack(Book* book,
+                             LoanFactory& factory,
+                             const std::string& startDate,
+                             const std::string& endDate);
     void borrowBook(Book* book,
                     LoanFactory& factory,
                     const std::string& startDate,
                     const std::string& endDate);
     void returnLoan(Loan* loan);
+    void returnBookByTitle(const std::string& bookTitle, LoanFactory& factory);
     void leaveReview(Book* book,
                      const std::string& text,
                      int score,
@@ -36,6 +41,8 @@ public:
     void setFilters(SearchCriteria& criteria);
     void printInfo() const;
     std::string getName() const;
+    bool hasEmail(const std::string& value) const;
+    int loanCount() const;
 };
 
 #endif

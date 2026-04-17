@@ -45,8 +45,21 @@ Loan* LoanFactory::create(Book* book,
 }
 
 void LoanFactory::notifyBookReleased(Book* book) {
+    if (book == nullptr) {
+        return;
+    }
+
     for (int i = 0; i < static_cast<int>(queues.size()); ++i) {
         if (queues[i]->getBook() == book) {
+            queues[i]->notifyAll();
+            return;
+        }
+    }
+}
+
+void LoanFactory::notifyBookReleasedByTitle(const std::string& bookTitle) {
+    for (int i = 0; i < static_cast<int>(queues.size()); ++i) {
+        if (queues[i]->getBook() != nullptr && queues[i]->getBook()->getTitle() == bookTitle) {
             queues[i]->notifyAll();
             return;
         }
