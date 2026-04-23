@@ -10,8 +10,11 @@
 #include "User.h"
 
 int main() {
+    std::string dataPath = "data/books.txt";
+
     std::cout << "Шаг 1: Создаем библиотеку...\n";
     Library library("Городская онлайн-библиотека");
+    library.getCatalog().loadFromFile(dataPath);
 
     std::cout << "Шаг 2: Создаем авторов и книги...\n";
     Author author1("Айзек Азимов", "Классик научной фантастики");
@@ -65,6 +68,8 @@ int main() {
 
     std::cout << "Шаг 10: Вывод статистики библиотеки...\n";
     library.printStatistics();
+
+    library.getCatalog().saveToFile(dataPath);
 
     return 0;
 }
