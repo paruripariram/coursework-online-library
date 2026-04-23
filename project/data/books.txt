@@ -1,0 +1,5 @@
+Dune;science fiction;1965;Frank Herbert
+The Hobbit;fantasy;1937;J. R. R. Tolkien
+Murder on the Orient Express;detective;1934;Agatha Christie
+Pride and Prejudice;romance;1813;Jane Austen
+Sapiens;non-fiction;2011;Yuval Noah Harari
