@@ -39,6 +39,10 @@ public:
                      int score,
                      const std::string& date);
     void setFilters(SearchCriteria& criteria);
+    bool returnBookByIndex(int index, LoanFactory& factory);
+    bool hasName(const std::string& value) const;
+    bool hasActiveLoans() const;
+    void printLoans() const;
     void printInfo() const;
     std::string getName() const;
     bool hasEmail(const std::string& value) const;

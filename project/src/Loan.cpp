@@ -34,6 +34,13 @@ bool Loan::isForBook(const std::string& bookTitle) const {
     return book->getTitle() == bookTitle;
 }
 
+std::string Loan::titleForListing() const {
+    if (book == nullptr) {
+        return "";
+    }
+    return book->getTitle();
+}
+
 void Loan::printInfo() const {
     std::cout << "Book: " << (book != nullptr ? book->getTitle() : "none") << "\n";
     std::cout << "User: " << userName << "\n";

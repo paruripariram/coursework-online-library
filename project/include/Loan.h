@@ -22,6 +22,7 @@ public:
     void extend(const std::string& newDate);
     bool isOverdue(const std::string& currentDate) const;
     bool isForBook(const std::string& bookTitle) const;
+    std::string titleForListing() const;
     void printInfo() const;
 };
 

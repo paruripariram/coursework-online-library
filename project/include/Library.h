@@ -21,6 +21,7 @@ public:
     void registerUser(User* user);
     void removeUser(User* user);
     User* findUserByEmail(const std::string& email) const;
+    User* findUserByName(const std::string& name) const;
     Catalog& getCatalog();
     LoanFactory& getFactory();
     void printStatistics() const;

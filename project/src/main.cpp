@@ -1,7 +1,8 @@
+#include <ctime>
 #include <iostream>
+#include <string>
 #include <vector>
 
-#include "Author.h"
 #include "Book.h"
 #include "Catalog.h"
 #include "Library.h"
@@ -9,67 +10,217 @@
 #include "Subscription.h"
 #include "User.h"
 
-int main() {
-    std::string dataPath = "data/books.txt";
+std::string dateFromTime(std::time_t value) {
+    std::tm localTime{};
+    localtime_s(&localTime, &value);
+    char buffer[11];
+    std::strftime(buffer, sizeof(buffer), "%Y-%m-%d", &localTime);
+    return std::string(buffer);
+}
 
-    std::cout << "Шаг 1: Создаем библиотеку...\n";
-    Library library("Городская онлайн-библиотека");
-    library.getCatalog().loadFromFile(dataPath);
+std::string todayDate() {
+    std::time_t now = std::time(nullptr);
+    return dateFromTime(now);
+}
 
-    std::cout << "Шаг 2: Создаем авторов и книги...\n";
-    Author author1("Айзек Азимов", "Классик научной фантастики");
-    Author author2("Джоан Роулинг", "Автор фэнтези-саги");
-    Author author3("Артур Конан Дойл", "Мастер детектива");
+std::string plusDaysDate(int days) {
+    std::time_t now = std::time(nullptr);
+    std::time_t shifted = now + static_cast<std::time_t>(days) * 24 * 60 * 60;
+    return dateFromTime(shifted);
+}
 
-    Book book1("Основание", "фантастика", 1951, author1);
-    Book book2("Я, робот", "фантастика", 1950, author1);
-    Book book3("Гарри Поттер и философский камень", "фэнтези", 1997, author2);
-    Book book4("Этюд в багровых тонах", "детектив", 1887, author3);
-    Book book5("Гарри Поттер и тайная комната", "фэнтези", 1998, author2);
-
-    library.getCatalog().addBook(&book1);
-    library.getCatalog().addBook(&book2);
-    library.getCatalog().addBook(&book3);
-    library.getCatalog().addBook(&book4);
-    library.getCatalog().addBook(&book5);
-
-    std::cout << "Шаг 3: Создаем пользователей и подписки...\n";
-    Subscription subscription1("standard", 3, "2026-12-31");
-    Subscription subscription2("basic", 1, "2026-12-31");
-
-    User user1("Иван", "ivan@example.com", subscription1);
-    User user2("Мария", "maria@example.com", subscription2);
-
-    library.registerUser(&user1);
-    library.registerUser(&user2);
-
-    std::cout << "Шаг 4: Поиск книг по жанру 'фантастика'...\n";
-    SearchCriteria criteria;
-    criteria.setGenre("фантастика");
-    std::vector<Book*> foundBooks = library.getCatalog().find(criteria);
-    for (int i = 0; i < static_cast<int>(foundBooks.size()); ++i) {
-        std::cout << "Найдена книга: " << foundBooks[i]->getTitle() << "\n";
+void printAllBooks(Catalog& catalog) {
+    std::vector<Book*> books = catalog.allBooks();
+    if (books.empty()) {
+        std::cout << "Каталог пуст.\n";
+        return;
     }
 
-    std::cout << "Шаг 5: Просмотр информации о книге...\n";
-    book1.printInfo();
+    for (int i = 0; i < static_cast<int>(books.size()); ++i) {
+        Book* book = books[i];
+        std::cout << i + 1 << ". "
+                  << book->getTitle() << " | "
+                  << book->getAuthor() << " | "
+                  << book->getGenre() << " | "
+                  << book->getYear() << " | "
+                  << (book->isAvailable() ? "доступна" : "занята")
+                  << "\n";
+    }
+}
 
-    std::cout << "Шаг 6: Пользователь 1 берет книгу...\n";
-    user1.borrowBook(&book1, library.getFactory(), "2026-04-17", "2026-05-01");
+void searchBooks(Catalog& catalog) {
+    std::cout << "Искать по (genre/author/title): ";
+    std::string mode;
+    std::getline(std::cin, mode);
 
-    std::cout << "Шаг 7: Пользователь 2 пытается взять ту же книгу...\n";
-    user2.borrowBook(&book1, library.getFactory(), "2026-04-17", "2026-05-10");
+    std::cout << "Введите значение: ";
+    std::string value;
+    std::getline(std::cin, value);
 
-    std::cout << "Шаг 8: Пользователь 1 оставляет отзыв...\n";
-    user1.leaveReview(&book1, "Сильная и умная фантастика", 5, "2026-04-17");
+    SearchCriteria criteria;
+    if (mode == "genre") {
+        criteria.setGenre(value);
+    } else if (mode == "author") {
+        criteria.setAuthor(value);
+    } else {
+        criteria.setTitle(value);
+    }
 
-    std::cout << "Шаг 9: Пользователь 1 возвращает книгу...\n";
-    user1.returnBookByTitle("Основание", library.getFactory());
+    std::vector<Book*> found = catalog.find(criteria);
+    if (found.empty()) {
+        std::cout << "Ничего не найдено.\n";
+        return;
+    }
 
-    std::cout << "Шаг 10: Вывод статистики библиотеки...\n";
-    library.printStatistics();
+    for (int i = 0; i < static_cast<int>(found.size()); ++i) {
+        std::cout << found[i]->getTitle() << " | "
+                  << found[i]->getAuthor() << " | "
+                  << found[i]->getGenre() << " | "
+                  << found[i]->getYear() << " | "
+                  << (found[i]->isAvailable() ? "доступна" : "занята")
+                  << "\n";
+    }
+}
 
-    library.getCatalog().saveToFile(dataPath);
+void borrowBook(User* user, Library& library) {
+    std::cout << "Введите название книги: ";
+    std::string title;
+    std::getline(std::cin, title);
+
+    Book* book = library.getCatalog().findByTitle(title);
+    if (book == nullptr) {
+        std::cout << "Книга не найдена.\n";
+        return;
+    }
+
+    std::string startDate = todayDate();
+    std::string endDate = plusDaysDate(14);
+    Loan* loan = user->borrowBookAndTrack(book, library.getFactory(), startDate, endDate);
+
+    if (loan != nullptr) {
+        std::cout << "Книга успешно выдана. Срок возврата: " << endDate << "\n";
+    }
+}
+
+void returnBook(User* user, Library& library) {
+    if (!user->hasActiveLoans()) {
+        std::cout << "У вас нет активных выдач.\n";
+        return;
+    }
+
+    std::cout << "Ваши активные выдачи:\n";
+    user->printLoans();
+    std::cout << "Введите номер выдачи для возврата: ";
+
+    int index = 0;
+    std::cin >> index;
+    std::cin.ignore(10000, '\n');
+
+    if (user->returnBookByIndex(index - 1, library.getFactory())) {
+        std::cout << "Книга успешно возвращена.\n";
+    } else {
+        std::cout << "Неверный номер выдачи.\n";
+    }
+}
+
+void leaveReview(User* user, Library& library) {
+    std::cout << "Введите название книги: ";
+    std::string title;
+    std::getline(std::cin, title);
+
+    Book* book = library.getCatalog().findByTitle(title);
+    if (book == nullptr) {
+        std::cout << "Книга не найдена.\n";
+        return;
+    }
+
+    std::cout << "Введите текст отзыва: ";
+    std::string text;
+    std::getline(std::cin, text);
+
+    std::cout << "Введите оценку (1-5): ";
+    int score = 0;
+    std::cin >> score;
+    std::cin.ignore(10000, '\n');
+
+    if (score < 1 || score > 5) {
+        std::cout << "Оценка должна быть от 1 до 5.\n";
+        return;
+    }
+
+    user->leaveReview(book, text, score, todayDate());
+    std::cout << "Отзыв добавлен.\n";
+}
+
+int main() {
+    Library library("Городская онлайн-библиотека");
+    std::vector<User*> createdUsers;
+
+    std::string dataPath = "data/books.txt";
+    library.getCatalog().loadFromFile(dataPath);
+
+    std::cout << "Введите имя пользователя: ";
+    std::string userName;
+    std::getline(std::cin, userName);
+
+    User* activeUser = library.findUserByName(userName);
+    if (activeUser == nullptr) {
+        std::cout << "Пользователь не найден. Введите email для регистрации: ";
+        std::string email;
+        std::getline(std::cin, email);
+
+        Subscription subscription("standard", 3, "2099-12-31");
+        activeUser = new User(userName, email, subscription);
+        createdUsers.push_back(activeUser);
+        library.registerUser(activeUser);
+        std::cout << "Пользователь создан.\n";
+    } else {
+        std::cout << "Пользователь найден.\n";
+    }
+
+    while (true) {
+        std::cout << "\n";
+        std::cout << "1. Показать все книги\n";
+        std::cout << "2. Поиск книги\n";
+        std::cout << "3. Взять книгу\n";
+        std::cout << "4. Вернуть книгу\n";
+        std::cout << "5. Оставить отзыв\n";
+        std::cout << "6. Мои выдачи\n";
+        std::cout << "0. Выход\n";
+        std::cout << "Выберите пункт: ";
+
+        int option = -1;
+        std::cin >> option;
+        std::cin.ignore(10000, '\n');
+
+        if (option == 0) {
+            library.getCatalog().saveToFile(dataPath);
+            break;
+        }
+        if (option == 1) {
+            printAllBooks(library.getCatalog());
+        } else if (option == 2) {
+            searchBooks(library.getCatalog());
+        } else if (option == 3) {
+            borrowBook(activeUser, library);
+        } else if (option == 4) {
+            returnBook(activeUser, library);
+        } else if (option == 5) {
+            leaveReview(activeUser, library);
+        } else if (option == 6) {
+            if (activeUser->hasActiveLoans()) {
+                activeUser->printLoans();
+            } else {
+                std::cout << "У вас нет активных выдач.\n";
+            }
+        } else {
+            std::cout << "Неизвестный пункт меню.\n";
+        }
+    }
+
+    for (int i = 0; i < static_cast<int>(createdUsers.size()); ++i) {
+        delete createdUsers[i];
+    }
 
     return 0;
 }

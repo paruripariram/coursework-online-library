@@ -40,6 +40,15 @@ User* Library::findUserByEmail(const std::string& email) const {
     return nullptr;
 }
 
+User* Library::findUserByName(const std::string& name) const {
+    for (int i = 0; i < static_cast<int>(users.size()); ++i) {
+        if (users[i]->hasName(name)) {
+            return users[i];
+        }
+    }
+    return nullptr;
+}
+
 Catalog& Library::getCatalog() {
     return catalog;
 }

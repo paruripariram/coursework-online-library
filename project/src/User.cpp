@@ -119,6 +119,36 @@ void User::setFilters(SearchCriteria& criteria) {
     }
 }
 
+bool User::returnBookByIndex(int index, LoanFactory& factory) {
+    if (index < 0 || index >= static_cast<int>(loans.size())) {
+        return false;
+    }
+
+    Loan* loan = loans[index];
+    std::string bookTitle = loan->titleForListing();
+
+    returnLoan(loan);
+    if (!bookTitle.empty()) {
+        factory.notifyBookReleasedByTitle(bookTitle);
+    }
+    return true;
+}
+
+bool User::hasName(const std::string& value) const {
+    return name == value;
+}
+
+bool User::hasActiveLoans() const {
+    return !loans.empty();
+}
+
+void User::printLoans() const {
+    for (int i = 0; i < static_cast<int>(loans.size()); ++i) {
+        std::cout << "[" << i + 1 << "]\n";
+        loans[i]->printInfo();
+    }
+}
+
 void User::printInfo() const {
     std::cout << "Name: " << name << "\n";
     std::cout << "Email: " << email << "\n";
