@@ -152,6 +152,29 @@ void leaveReview(User* user, Library& library) {
     std::cout << "Отзыв добавлен.\n";
 }
 
+User* selectOrCreateUser(Library& library, std::vector<User*>& createdUsers) {
+    std::cout << "Введите имя пользователя: ";
+    std::string userName;
+    std::getline(std::cin, userName);
+
+    User* user = library.findUserByName(userName);
+    if (user == nullptr) {
+        std::cout << "Пользователь не найден. Введите email для регистрации: ";
+        std::string email;
+        std::getline(std::cin, email);
+
+        Subscription subscription("standard", 3, "2099-12-31");
+        user = new User(userName, email, subscription);
+        createdUsers.push_back(user);
+        library.registerUser(user);
+        std::cout << "Пользователь создан.\n";
+    } else {
+        std::cout << "Пользователь найден.\n";
+    }
+
+    return user;
+}
+
 int main() {
     Library library("Городская онлайн-библиотека");
     std::vector<User*> createdUsers;
@@ -159,24 +182,7 @@ int main() {
     std::string dataPath = "data/books.txt";
     library.getCatalog().loadFromFile(dataPath);
 
-    std::cout << "Введите имя пользователя: ";
-    std::string userName;
-    std::getline(std::cin, userName);
-
-    User* activeUser = library.findUserByName(userName);
-    if (activeUser == nullptr) {
-        std::cout << "Пользователь не найден. Введите email для регистрации: ";
-        std::string email;
-        std::getline(std::cin, email);
-
-        Subscription subscription("standard", 3, "2099-12-31");
-        activeUser = new User(userName, email, subscription);
-        createdUsers.push_back(activeUser);
-        library.registerUser(activeUser);
-        std::cout << "Пользователь создан.\n";
-    } else {
-        std::cout << "Пользователь найден.\n";
-    }
+    User* activeUser = selectOrCreateUser(library, createdUsers);
 
     while (true) {
         std::cout << "\n";
@@ -186,6 +192,7 @@ int main() {
         std::cout << "4. Вернуть книгу\n";
         std::cout << "5. Оставить отзыв\n";
         std::cout << "6. Мои выдачи\n";
+        std::cout << "7. Сменить или создать пользователя\n";
         std::cout << "0. Выход\n";
         std::cout << "Выберите пункт: ";
 
@@ -213,6 +220,8 @@ int main() {
             } else {
                 std::cout << "У вас нет активных выдач.\n";
             }
+        } else if (option == 7) {
+            activeUser = selectOrCreateUser(library, createdUsers);
         } else {
             std::cout << "Неизвестный пункт меню.\n";
         }
