@@ -13,10 +13,6 @@ public:
         : name(name), biography(biography) {
     }
 
-    std::string asCatalogText() const {
-        return name;
-    }
-
     std::string getName() const {
         return name;
     }
