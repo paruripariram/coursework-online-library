@@ -8,16 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 include_directories(include)
 
 add_executable(online_library
-    src/Author.cpp
-    src/Book.cpp
     src/Catalog.cpp
     src/Library.cpp
-    src/Loan.cpp
     src/LoanFactory.cpp
-    src/ReservationQueue.cpp
-    src/Review.cpp
-    src/SearchCriteria.cpp
-    src/Subscription.cpp
     src/User.cpp
     src/main.cpp
 )

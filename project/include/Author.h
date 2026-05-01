@@ -9,9 +9,17 @@ private:
     std::string biography;
 
 public:
-    Author(const std::string& name, const std::string& biography);
-    void printInfo() const;
-    std::string asCatalogText() const;
+    Author(const std::string& name, const std::string& biography)
+        : name(name), biography(biography) {
+    }
+
+    std::string asCatalogText() const {
+        return name;
+    }
+
+    std::string getName() const {
+        return name;
+    }
 };
 
 #endif
