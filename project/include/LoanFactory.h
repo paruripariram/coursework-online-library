@@ -15,11 +15,7 @@ private:
     std::vector<std::pair<Book*, std::vector<IObserver*>>> queues;
 
 public:
-    LoanFactory() {
-    }
-
-    ~LoanFactory() {
-    }
+    
 
     LoanRecord* create(Book* book,
                        const std::string& userName,
