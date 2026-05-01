@@ -29,7 +29,6 @@ public:
         status = "returned";
     }
 
-    // Геттеры для диаграммы классов
     std::string getStatus() const { return status; }
     std::string getEndDate() const { return endDate; }
     

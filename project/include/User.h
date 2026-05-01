@@ -34,18 +34,22 @@ public:
                                    LoanFactory& factory,
                                    const std::string& startDate,
                                    const std::string& endDate) {
-        if (book == nullptr) {
-            return nullptr;
-        }
-        if (static_cast<int>(loans.size()) >= subscription.getBookLimit()) {
+        LoanRecord* newLoan = nullptr;
+        bool canBorrow = (book != nullptr);
+
+        if (canBorrow && static_cast<int>(loans.size()) >= subscription.getBookLimit()) {
             std::cout << "Loan limit reached." << "\n";
-            return nullptr;
+            canBorrow = false;
         }
-        LoanRecord* newLoan = factory.create(book, name, this, startDate, endDate);
-        if (newLoan != nullptr) {
-            loans.push_back(*newLoan);
-            delete newLoan;
+
+        if (canBorrow) {
+            newLoan = factory.create(book, name, this, startDate, endDate);
+            if (newLoan != nullptr) {
+                loans.push_back(*newLoan);
+                delete newLoan;
+            }
         }
+
         return newLoan;
     }
 
@@ -53,25 +57,27 @@ public:
                      const std::string& text,
                      int score,
                      const std::string& date) {
-        if (book == nullptr) {
-            return;
+        if (book != nullptr) {
+            Review review(book->getTitle(), name, text, score, date);
+            book->addReview(review);
         }
-        Review review(book->getTitle(), name, text, score, date);
-        book->addReview(review);
     }
 
     bool returnBookByIndex(int index, LoanFactory& factory) {
-        if (index < 0 || index >= static_cast<int>(loans.size())) {
-            return false;
+        bool returned = false;
+
+        if (index >= 0 && index < static_cast<int>(loans.size())) {
+            LoanRecord& loan = loans[index];
+            std::string bookTitle = loan.titleForListing();
+            loan.returnBook();
+            loans.erase(loans.begin() + index);
+            if (!bookTitle.empty()) {
+                factory.notifyBookReleasedByTitle(bookTitle);
+            }
+            returned = true;
         }
-        LoanRecord& loan = loans[index];
-        std::string bookTitle = loan.titleForListing();
-        loan.returnBook();
-        loans.erase(loans.begin() + index);
-        if (!bookTitle.empty()) {
-            factory.notifyBookReleasedByTitle(bookTitle);
-        }
-        return true;
+
+        return returned;
     }
 
     bool hasName(const std::string& value) const {

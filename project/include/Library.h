@@ -21,24 +21,29 @@ public:
     }
 
     void registerUser(User* user) {
-        if (user == nullptr) {
-            return;
-        }
-        for (int i = 0; i < static_cast<int>(users.size()); ++i) {
+        bool canAdd = (user != nullptr);
+        int i = 0;
+        while (canAdd && i < static_cast<int>(users.size())) {
             if (users[i] == user) {
-                return;
+                canAdd = false;
             }
+            ++i;
         }
-        users.push_back(user);
+        if (canAdd) {
+            users.push_back(user);
+        }
     }
 
     User* findUserByName(const std::string& name) const {
-        for (int i = 0; i < static_cast<int>(users.size()); ++i) {
+        User* found = nullptr;
+        int i = 0;
+        while (i < static_cast<int>(users.size()) && found == nullptr) {
             if (users[i]->hasName(name)) {
-                return users[i];
+                found = users[i];
             }
+            ++i;
         }
-        return nullptr;
+        return found;
     }
 
     Catalog& getCatalog() { return catalog; }
