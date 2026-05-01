@@ -24,12 +24,15 @@ public:
     }
 
     Book* findByTitle(const std::string& title) const {
-        for (int i = 0; i < static_cast<int>(books.size()); ++i) {
+        Book* found = nullptr;
+        int i = 0;
+        while (i < static_cast<int>(books.size()) && found == nullptr) {
             if (books[i]->getTitle() == title) {
-                return books[i];
+                found = books[i];
             }
+            ++i;
         }
-        return nullptr;
+        return found;
     }
 
     std::vector<Book*> find(const std::string& mode, const std::string& value) const {
@@ -45,48 +48,50 @@ public:
 
     void loadFromFile(const std::string& path) {
         std::ifstream input(path);
-        if (!input.is_open()) {
-            return;
-        }
-        std::string line;
-        while (std::getline(input, line)) {
-            if (line.empty()) {
-                continue;
+        if (input.is_open()) {
+            std::string line;
+            while (std::getline(input, line)) {
+                bool validLine = !line.empty();
+                std::stringstream stream(line);
+                std::string title;
+                std::string genre;
+                std::string yearText;
+                std::string authorName;
+
+                if (validLine) {
+                    validLine = static_cast<bool>(std::getline(stream, title, ';'));
+                }
+                if (validLine) {
+                    validLine = static_cast<bool>(std::getline(stream, genre, ';'));
+                }
+                if (validLine) {
+                    validLine = static_cast<bool>(std::getline(stream, yearText, ';'));
+                }
+                if (validLine) {
+                    validLine = static_cast<bool>(std::getline(stream, authorName, ';'));
+                }
+
+                int year = 0;
+                if (validLine) {
+                    try {
+                        year = std::stoi(yearText);
+                    } catch (...) {
+                        validLine = false;
+                    }
+                }
+                if (validLine) {
+                    addBook(new Book(title, genre, year, authorName));
+                }
             }
-            std::stringstream stream(line);
-            std::string title;
-            std::string genre;
-            std::string yearText;
-            std::string authorName;
-            if (!std::getline(stream, title, ';')) {
-                continue;
-            }
-            if (!std::getline(stream, genre, ';')) {
-                continue;
-            }
-            if (!std::getline(stream, yearText, ';')) {
-                continue;
-            }
-            if (!std::getline(stream, authorName, ';')) {
-                continue;
-            }
-            int year = 0;
-            try {
-                year = std::stoi(yearText);
-            } catch (...) {
-                continue;
-            }
-            addBook(new Book(title, genre, year, authorName));
         }
     }
 
     void saveToFile(const std::string& path) const {
         std::ofstream output(path);
-        if (!output.is_open()) {
-            return;
-        }
-        for (int i = 0; i < static_cast<int>(books.size()); ++i) {
-            output << books[i]->getTitle() << ';' << books[i]->getGenre() << ';' << books[i]->getYear() << ';' << books[i]->getAuthor() << "\n";
+        if (output.is_open()) {
+            for (int i = 0; i < static_cast<int>(books.size()); ++i) {
+                output << books[i]->getTitle() << ';' << books[i]->getGenre() << ';' << books[i]->getYear() << ';' << books[i]->getAuthor() << "\n";
+            }
         }
     }
 };

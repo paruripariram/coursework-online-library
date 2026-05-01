@@ -22,7 +22,12 @@ public:
          const std::string& genre,
          int year,
          const std::string& author)
-        : title(title), genre(genre), year(year), author(author, ""), available(true), rating(0.0f) {
+        : title(title), 
+        genre(genre), 
+        year(year), 
+        author(author, ""), 
+        available(true), 
+        rating(0.0f) {
     }
 
     void lock() {
