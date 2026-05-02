@@ -10,7 +10,6 @@
 #include "IObserver.h"
 #include "LoanRecord.h"
 #include "Notification.h"
-#include <ctime>
 
 class LoanFactory {
 private:
@@ -57,20 +56,8 @@ public:
         while (i < static_cast<int>(queues.size()) && !notified) {
             if (queues[i].first != nullptr && queues[i].first->getTitle() == bookTitle) {
                 std::string message = "Book is available: " + bookTitle;
-                // build date string
-                std::time_t t = std::time(nullptr);
-                std::tm tmv{};
-#if defined(_MSC_VER) || defined(__MINGW32__)
-                localtime_s(&tmv, &t);
-#else
-                std::tm* tmPtr = std::localtime(&t);
-                if (tmPtr) {
-                    tmv = *tmPtr;
-                }
-#endif
-                char buf[64] = {0};
-                std::strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmv);
-                std::string dateStr(buf);
+                // simplified: no timestamp formatting — use empty date
+                std::string dateStr("");
                 Notification notif(message, dateStr);
                 for (int j = 0; j < static_cast<int>(queues[i].second.size()); ++j) {
                     queues[i].second[j]->notify(notif);
