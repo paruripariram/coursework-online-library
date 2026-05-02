@@ -7,6 +7,7 @@
 
 #include "Book.h"
 #include "IObserver.h"
+#include "Notification.h"
 #include "LoanRecord.h"
 #include "Review.h"
 #include "Subscription.h"
@@ -18,6 +19,7 @@ private:
     std::string email;
     Subscription subscription;
     std::vector<LoanRecord> loans;
+    std::vector<Notification> notifications;
 
 public:
     User(const std::string& name,
@@ -26,8 +28,9 @@ public:
         : name(name), email(email), subscription("standard", loanLimit, "") {
     }
 
-    void notify(const std::string& message) override {
-        std::cout << "[" << name << "]: " << message << "\n";
+    void notify(const Notification& notification) override {
+        std::cout << "[" << name << "]: " << notification.getMessage() << " (" << notification.getDate() << ")\n";
+        notifications.push_back(notification);
     }
 
     LoanRecord* borrowBookAndTrack(Book* book,
