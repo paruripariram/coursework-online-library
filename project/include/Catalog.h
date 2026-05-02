@@ -39,7 +39,10 @@ public:
         std::vector<Book*> result;
         for (int i = 0; i < static_cast<int>(books.size()); ++i) {
             Book* current = books[i];
-            if ((mode == "genre" && current->getGenre() == value) || (mode == "author" && current->getAuthor() == value) || (mode != "genre" && mode != "author" && current->getTitle() == value)) {
+            if ((mode == "genre" && current->getGenre() == value) ||
+             (mode == "author" && current->getAuthor() == value) ||
+              (mode != "genre" && mode != "author" &&
+                 current->getTitle() == value)) {
                 result.push_back(current);
             }
         }
@@ -86,14 +89,6 @@ public:
         }
     }
 
-    void saveToFile(const std::string& path) const {
-        std::ofstream output(path);
-        if (output.is_open()) {
-            for (int i = 0; i < static_cast<int>(books.size()); ++i) {
-                output << books[i]->getTitle() << ';' << books[i]->getGenre() << ';' << books[i]->getYear() << ';' << books[i]->getAuthor() << "\n";
-            }
-        }
-    }
 };
 
 #endif
