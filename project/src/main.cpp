@@ -28,9 +28,12 @@ int main() {
     library.getCatalog().loadFromFile("data/books.txt");
 
     std::vector<User*> users;
-    User* user = new User("Guest", "guest@example.com", 3);
-    users.push_back(user);
-    library.registerUser(user);
+    User* firstUser = new User("Guest", "guest@example.com", 3);
+    User* secondUser = new User("QueueUser", "queue@example.com", 3);
+    users.push_back(firstUser);
+    users.push_back(secondUser);
+    library.registerUser(firstUser);
+    library.registerUser(secondUser);
 
     std::vector<Book*> books = library.getCatalog().allBooks();
     if (books.empty()) {
@@ -44,19 +47,25 @@ int main() {
 
         Book* firstBook = books[0];
         std::cout << "\nBorrowing: " << firstBook->getTitle() << "\n";
-        if (user->borrowBookAndTrack(firstBook, library.getFactory(), todayDate(), plusDaysDate(14)) != nullptr) {
-            std::cout << "Loan created.\n";
+        if (firstUser->borrowBookAndTrack(firstBook, library.getFactory(), todayDate(), plusDaysDate(14)) != nullptr) {
+            std::cout << "First user loan created.\n";
         }
 
-        if (user->hasActiveLoans()) {
-            std::cout << "\nActive loans:\n";
-            user->printLoans();
-            if (user->returnBookByIndex(0, library.getFactory())) {
+        std::cout << "Second user tries to borrow same book (queue test):\n";
+        if (secondUser->borrowBookAndTrack(firstBook, library.getFactory(), todayDate(), plusDaysDate(14)) == nullptr) {
+            std::cout << "Second user added to queue.\n";
+        }
+
+        if (firstUser->hasActiveLoans()) {
+            std::cout << "\nFirst user active loans:\n";
+            firstUser->printLoans();
+            std::cout << "\nFirst user returns the book (should trigger notification):\n";
+            if (firstUser->returnBookByIndex(0, library.getFactory())) {
                 std::cout << "Loan returned.\n";
             }
         }
 
-        user->leaveReview(firstBook, "Good book", 5, todayDate());
+        firstUser->leaveReview(firstBook, "Good book", 5, todayDate());
     }
 
     library.getCatalog().saveToFile("data/books.txt");
