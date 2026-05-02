@@ -67,9 +67,6 @@ int main() {
 
         firstUser->leaveReview(firstBook, "Good book", 5, todayDate());
     }
-
-    library.getCatalog().saveToFile("data/books.txt");
-
     for (int i = 0; i < static_cast<int>(users.size()); ++i) {
         delete users[i];
     }
