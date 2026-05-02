@@ -9,7 +9,6 @@ private:
     std::string date;
 
 public:
-    Notification() = default;
     Notification(const std::string& message, const std::string& date)
         : message(message), date(date) {
     }
