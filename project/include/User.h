@@ -6,14 +6,13 @@
 #include <iostream>
 
 #include "Book.h"
-#include "IObserver.h"
 #include "Notification.h"
 #include "LoanRecord.h"
 #include "Review.h"
 #include "Subscription.h"
 #include "LoanFactory.h"
 
-class User : public IObserver {
+class User {
 private:
     std::string name;
     std::string email;
@@ -28,7 +27,7 @@ public:
         : name(name), email(email), subscription("standard", loanLimit, "") {
     }
 
-    void notify(const Notification& notification) override {
+    void notify(const Notification& notification) {
         std::cout << "[" << name << "]: " << notification.getMessage() << " (" << notification.getDate() << ")\n";
         notifications.push_back(notification);
     }
@@ -46,7 +45,13 @@ public:
         }
 
         if (canBorrow) {
-            newLoan = factory.create(book, name, this, startDate, endDate);
+            newLoan = factory.create(book,
+                                     name,
+                                     [this](const Notification& notification) {
+                                         notify(notification);
+                                     },
+                                     startDate,
+                                     endDate);
             if (newLoan != nullptr) {
                 loans.push_back(*newLoan);
                 delete newLoan;
